@@ -4,16 +4,5 @@ class MySpider(scrapy.Spider):
   name = 'myspider'
   
   start_urls = [
-    'http://example.com/'
+    'https://map.naver.com/v5/search/%EC%82%BC%EC%B2%99%EC%8B%9C%20%EB%85%B8%EA%B3%A1%EB%A9%B4%20%EB%A7%9B%EC%A7%91/place/15034988?c=12,0,0,0,dh&placePath=%3Fentry%253Dpll'
   ]
-  
-  def parse(self, response):
-    self.log('Visited %s' % response.url)
-
-    # CSS 또는 XPath를 이용해 웹 페이지의 특정 부분을 선택합니다.
-    # 이 예제에서는 <title> 태그의 텍스트를 선택합니다.
-    title = response.css('title::text').get()
-
-    yield {
-        'title': title,
-    }

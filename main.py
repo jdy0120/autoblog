@@ -4,8 +4,9 @@ if __name__ == "__main__":
     # Spider 인스턴스 생성
     spider = MySpider()
     
+    
     # 크롤링 시작
-    # data = spider.crawl()
+    data = spider.parse('https://map.naver.com/v5/search/%EC%82%BC%EC%B2%99%EC%8B%9C%20%EB%85%B8%EA%B3%A1%EB%A9%B4%20%EB%A7%9B%EC%A7%91/place/15034988?c=12,0,0,0,dh&placePath=%3Fentry%253Dpll')
 
     # BlogApiHandler 인스턴스 생성
     # blog_api_handler = BlogApiHandler()
