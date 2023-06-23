@@ -1,1 +1,1 @@
-from .spider import search_naver
+from .crawler import search_naver
