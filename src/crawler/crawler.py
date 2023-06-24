@@ -16,12 +16,30 @@ def search_naver(query):
 
     # naver.com에 접근
     driver.get("https://map.naver.com/v5/search/" + query + '맛집')
-
+    
+    # searchIframe으로 이동
     driver.switch_to.frame("searchIframe")
     
     try:
       element = WebDriverWait(driver,10).until(
         EC.presence_of_element_located((By.XPATH, f"/html/body/div[3]/div/div[3]/div[1]/ul/li[3]/div[1]/a[1]/div/div/span[1]"))
+      )
+      
+      element.click()
+      
+    finally:
+      pass
+
+    time.sleep(3)
+    
+    # 부모 프레임으로 이동 후 음식점 상세 프레임으로 이동
+    driver.switch_to.parent_frame()
+    
+    driver.switch_to.frame('entryIframe')
+    
+    try:
+      element = WebDriverWait(driver,10).until(
+        EC.presence_of_element_located((By.XPATH, f"/html/body/div[3]/div/div/div/div[2]/div[2]/a[1]"))
       )
       
       element.click()
