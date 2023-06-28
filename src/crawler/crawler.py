@@ -37,6 +37,28 @@ def search_naver(query):
     
     driver.switch_to.frame('entryIframe')
     
+    #주소
+    driver.find_element(By.XPATH,f'')
+    
+    #주차장
+    driver.find_element(By.XPATH,f'')
+    
+    #시간
+    driver.find_element(By.XPATH,f'')
+    
+    #전화
+    driver.find_element(By.XPATH,f'')
+    
+    #가게
+    driver.find_element(By.XPATH,f'')
+    
+    #홈페이지
+    driver.find_element(By.XPATH,f'')
+    
+    #detail
+    driver.find_element(By.XPATH,f'')
+    
+    
     try:
       element = WebDriverWait(driver,10).until(
         EC.presence_of_element_located((By.XPATH, f"/html/body/div[3]/div/div/div/div[2]/div[2]/a[1]"))
