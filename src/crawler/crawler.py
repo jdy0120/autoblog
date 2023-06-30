@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import ActionChains
 import time
 
 def search_naver(query):
@@ -13,6 +14,7 @@ def search_naver(query):
     chrome_options.add_experimental_option("detach", True)
     
     driver = webdriver.Chrome()
+    action = ActionChains(driver)
 
     # naver.com에 접근
     driver.get("https://map.naver.com/v5/search/" + query + '맛집')
@@ -93,25 +95,45 @@ def search_naver(query):
       print('detail 정보가 없습니다.')
     
     try:
-      element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div/div[8]/div[1]/ul')))
+      time.sleep(3)
+      driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
       
-      list_items = element.find_elements(By.TAG_NAME, "li")
-      
-      for index,item in enumerate(list_items):
-        item.click()
-        
-        driver.switch_to.window(driver.window_handles[index+1])
-        
-            
-        
-        
-        driver.switch_to.frame('mainFrame')
-        blog_post = driver.find_element(By.XPATH,f'//*[@id="post-view223108686514"]/div/div/div[3]')
-        
-        print(blog_post.text)
-        
+      element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div/div[8]/div[2]/a')))
+      element.click()
     except:
       print('블로그 리뷰 더보기 버튼이 없습니다.')
+
+    try:
+      element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul')))
+      list_items = element.find_elements(By.TAG_NAME, "li")
+    
+      for index,item in enumerate(list_items):
+        try:
+          driver.switch_to.frame('entryIframe')
+        except:
+          print('entryIframe이 없습니다.')
+        item.click()
+      
+        driver.switch_to.window(driver.window_handles[index+1])
+        
+        driver.switch_to.frame('mainFrame')
+        
+        blog_post = driver.find_elements(By.CSS_SELECTOR,f"div[id*='post-view']")
+        
+        for post in blog_post:
+          print(post.text)
+      
+        # print(blog_post.text)
+        
+        driver.switch_to.window(driver.window_handles[0])
+      
+    except:
+      print('블로그 리뷰가 없습니다.')
+    
+      
+      
+      
+
     # try:
     #   element = WebDriverWait(driver,10).until(
     #     EC.presence_of_element_located((By.XPATH, f"/html/body/div[3]/div/div/div/div[2]/div[2]/a[1]"))
