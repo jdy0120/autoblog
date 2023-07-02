@@ -1,1 +1,1 @@
-from answer_api_chat_gpt import answer_api_chat_gpt
+from .answer_api_chat_gpt import answer_api_chat_gpt

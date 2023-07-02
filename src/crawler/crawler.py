@@ -7,6 +7,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
 import time
 
+def list_element(driver):
+  element = driver.find_elements(By.XPATH,f'/html/body/div[3]/div/div[3]/div[1]/ul/li')
+  for e in element:
+    print(e.text)
+
 def search_list(driver):
   try:
     element = WebDriverWait(driver,10).until(
@@ -22,6 +27,13 @@ def search_list(driver):
 
 def search_detail(driver):
   
+  element = driver.find_element(By.CLASS_NAME,f'place_section_content')
+  all_down_arrow = element.find_elements(By.XPATH, f"//a[@aria-expanded='false']")
+  
+  for e in all_down_arrow:
+    e.click()
+  
+  time.sleep(10)
   try:
   #주소
     element = driver.find_element(By.XPATH,f'//*[@id="app-root"]/div/div/div/div[6]/div/div[2]/div/div/div[1]/div/a/span[1]')
@@ -84,14 +96,14 @@ def search_naver(query):
     
     driver = webdriver.Chrome()
 
-    print(query)
-
     # naver.com에 접근
     driver.get("https://map.naver.com/v5/search/" + query + '맛집')
     
     
     # searchIframe으로 이동
     driver.switch_to.frame("searchIframe")
+    
+    list_element(driver)
     
     # 음식점 리스트 클릭
     search_list(driver)
@@ -110,7 +122,7 @@ def search_naver(query):
       
       time.sleep(3)
       
-      element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f"//a[contains(text(), '블로그리뷰 더보기')]")))
+      element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f"//a[contains(., '더보기') and .//span[contains(., '블로그리뷰')]]")))
       element.click()
     except:
       print('블로그 리뷰 더보기 버튼이 없습니다.')
