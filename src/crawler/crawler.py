@@ -7,6 +7,27 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
 import time
 
+def infinity_scroll(driver):
+  SCROLL_PAUSE_TIME = 2
+
+  scroll_element = driver.find_element(By.XPATH,f'//*[@id="_pcmap_list_scroll_container"]')
+  # Get scroll height initially
+  last_height = driver.execute_script("return arguments[0].scrollHeight", scroll_element)
+
+  while True:
+    # Scroll down to bottom within the element
+    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scroll_element)
+
+    # Wait to load page
+    time.sleep(SCROLL_PAUSE_TIME)
+
+    # Calculate new scroll height and compare with last scroll height
+    new_height = driver.execute_script("return arguments[0].scrollHeight", scroll_element)
+    if new_height == last_height:
+        # If heights are the same, the bottom is reached and exit the loop
+        break
+    last_height = new_height
+
 def list_element(driver):
   try:
     element = driver.find_element(By.XPATH,f'//*[@id="_pcmap_list_scroll_container"]/ul')
@@ -84,10 +105,15 @@ def search_naver(query):
     driver.get("https://map.naver.com/v5/search/" + query + '맛집')
     
     
+    
     # searchIframe으로 이동
     driver.switch_to.frame("searchIframe")
     
     time.sleep(3)
+    
+    # infinity_scroll(driver)
+    
+    # time.sleep(2)
     
     element = list_element(driver)
     if (element == False):
@@ -96,56 +122,72 @@ def search_naver(query):
     
     shop_list = element.find_elements(By.XPATH, "./li")
     
-    for shop in shop_list:
-      # 음식점 리스트 클릭
-      search_list(shop)
+    page_list_count = 1
+    
+    while True:
+      for shop in shop_list:
+        # 음식점 리스트 클릭
+        search_list(shop)
 
-      time.sleep(3)
-      
-      # 부모 프레임으로 이동 후 음식점 상세 프레임으로 이동
-      driver.switch_to.parent_frame()
-      
-      driver.switch_to.frame('entryIframe')
-      
-      search_detail(driver)
-      
-      try:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        
         time.sleep(3)
         
-        element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f"//a[contains(., '더보기') and .//span[contains(., '블로그리뷰')]]")))
-        element.click()
-      except:
-        print('블로그 리뷰 더보기 버튼이 없습니다.')
+        # 부모 프레임으로 이동 후 음식점 상세 프레임으로 이동
+        driver.switch_to.parent_frame()
+        
+        driver.switch_to.frame('entryIframe')
+        
+        search_detail(driver)
+        
+        try:
+          driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+          
+          time.sleep(3)
+          
+          element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f"//a[contains(., '더보기') and .//span[contains(., '블로그리뷰')]]")))
+          element.click()
+        except:
+          print('블로그 리뷰 더보기 버튼이 없습니다.')
 
+        try:
+          element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul')))
+          list_items = element.find_elements(By.TAG_NAME, "li")
+        
+          for index,item in enumerate(list_items):
+            try:
+              driver.switch_to.frame('entryIframe')
+            except:
+              print('entryIframe이 없습니다.')
+            item.click()
+          
+            driver.switch_to.window(driver.window_handles[1])
+            
+            driver.switch_to.frame('mainFrame')
+            
+            blog_post = driver.find_elements(By.CSS_SELECTOR,f"div[id*='post-view']")
+            
+            for post in blog_post:
+              print(post.text)
+              
+            driver.close()
+          
+            driver.switch_to.window(driver.window_handles[0])
+          
+        except:
+          print('블로그 리뷰가 없습니다.')
+        
+        time.sleep(3)
+        driver.switch_to.parent_frame()
+        driver.switch_to.frame("searchIframe")
+      
+      page_list_count += 1
+      
       try:
-        element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul')))
-        list_items = element.find_elements(By.TAG_NAME, "li")
-      
-        for index,item in enumerate(list_items):
-          try:
-            driver.switch_to.frame('entryIframe')
-          except:
-            print('entryIframe이 없습니다.')
-          item.click()
-        
-          driver.switch_to.window(driver.window_handles[index+1])
-          
-          driver.switch_to.frame('mainFrame')
-          
-          blog_post = driver.find_elements(By.CSS_SELECTOR,f"div[id*='post-view']")
-          
-          for post in blog_post:
-            print(post.text)
-        
-          driver.switch_to.window(driver.window_handles[0])
-        
+        element = driver.find_element(By.CLASS_NAME,f'zRM9F')
+        page_number_element = element.find_element(By.XPATH, f"//a[text()={page_list_count}]")
+        page_number_element.click()
+        time.sleep(3)
       except:
-        print('블로그 리뷰가 없습니다.')
-        
-      driver.switch_to.parent_frame()
-      driver.switch_to.frame("searchIframe")
-      
+        print('더보기 버튼이 없습니다.')
+        break
 
     driver.close()
