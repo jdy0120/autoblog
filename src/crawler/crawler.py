@@ -66,7 +66,6 @@ def search_detail(driver):
         # a 태그가 없으면 무시하고 진행합니다.
         pass
 
-
     time.sleep(0.1)
     print('\n'.split(e.text)[0])
     
