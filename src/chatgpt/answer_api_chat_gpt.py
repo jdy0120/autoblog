@@ -8,10 +8,11 @@ load_dotenv(verbose=True)
 openai.api_key = os.getenv("CHAT_GPT_API")
 
 def answer_api_chat_gpt(text):
-  response = openai.Completion.create(
-    model="text-davinci-003", # The deployment name you chose when you deployed the ChatGPT or GPT-4 model.
-    prompt=f"Answer the question based on the context below, and if the question can't be answered based on the context, say \"I don't know\"\n\nContext: doyeon\n\n---\n\nQuestion: can you answer korean?\nAnswer:"
+  
+  response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo", # The deployment name you chose when you deployed the ChatGPT or GPT-4 model.
+    messages=[{"role": "user", "content": f"다음 내용을 정리해서 출력해줘 \n {text}"}]
   )
   
-  answer =response["choices"][0]["text"].strip()
-  print(answer)
+  answer = response.choices[0].message.content
+  print('chat_gpt 답변', answer)

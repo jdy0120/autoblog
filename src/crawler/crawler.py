@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
+from src.chatgpt import answer_api_chat_gpt
 import time
 
 def infinity_scroll(driver):
@@ -90,7 +91,13 @@ def search_detail(driver):
     except:
         pass
 
-  print(shop_info)
+  shop_information = ''
+  
+  for key, value in shop_info.items():
+    shop_information += f'{key} : {value} \n'
+    
+  return shop_information
+  
   
 def search_naver(query):
     # 크롬 웹드라이버의 경로를 입력하세요
@@ -135,7 +142,9 @@ def search_naver(query):
         
         driver.switch_to.frame('entryIframe')
         
-        search_detail(driver)
+        shop_information = search_detail(driver)
+        
+        shop_reviews = []
         
         try:
           driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -151,7 +160,7 @@ def search_naver(query):
           element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul')))
           list_items = element.find_elements(By.TAG_NAME, "li")
         
-          for index,item in enumerate(list_items):
+          for item in list_items:
             try:
               driver.switch_to.frame('entryIframe')
             except:
@@ -165,7 +174,7 @@ def search_naver(query):
             blog_post = driver.find_elements(By.CSS_SELECTOR,f"div[id*='post-view']")
             
             for post in blog_post:
-              print(post.text)
+              shop_reviews.append(post.text)
               
             driver.close()
           
@@ -173,6 +182,10 @@ def search_naver(query):
           
         except:
           print('블로그 리뷰가 없습니다.')
+          
+        if (len(shop_reviews) != 0):
+          answer_api_chat_gpt(shop_information)
+          answer_api_chat_gpt('\n'.join(shop_reviews))
         
         time.sleep(3)
         driver.switch_to.parent_frame()
