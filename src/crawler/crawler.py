@@ -183,13 +183,14 @@ def search_naver(query):
         except:
           print('블로그 리뷰가 없습니다.')
           
-        if (len(shop_reviews) != 0):
-          answer_api_chat_gpt(shop_information)
-          answer_api_chat_gpt('\n'.join(shop_reviews))
-        
         time.sleep(3)
         driver.switch_to.parent_frame()
         driver.switch_to.frame("searchIframe")
+        
+        if (len(shop_reviews) != 0):
+          answer_api_chat_gpt('',shop_information)
+          # answer_api_chat_gpt('','\n'.join(shop_reviews))
+          continue
       
       page_list_count += 1
       
