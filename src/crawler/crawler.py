@@ -44,7 +44,7 @@ def search_list(shop):
     
     element.click()
   except:
-    return
+    return False
     
   finally:
     pass
