@@ -103,6 +103,9 @@ def search_naver(query):
     # 크롬 웹드라이버의 경로를 입력하세요
     
     chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_experimental_option("detach", True)
     
     driver = webdriver.Chrome()
@@ -116,24 +119,27 @@ def search_naver(query):
     driver.switch_to.frame("searchIframe")
     
     time.sleep(3)
-    
-    # infinity_scroll(driver)
-    
-    # time.sleep(2)
+
     
     element = list_element(driver)
     if (element == False):
       driver.close()
       return
     
-    shop_list = element.find_elements(By.XPATH, "./li")
     
     page_list_count = 1
     
     while True:
+      
+      infinity_scroll(driver)
+      
+      shop_list = element.find_elements(By.XPATH, "./li")
+      
       for shop in shop_list:
         # 음식점 리스트 클릭
-        search_list(shop)
+        canSearch = search_list(shop)
+        if (canSearch == False):
+          continue
 
         time.sleep(3)
         
@@ -151,13 +157,13 @@ def search_naver(query):
           
           time.sleep(3)
           
-          element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f"//a[contains(., '더보기') and .//span[contains(., '블로그리뷰')]]")))
+          element = WebDriverWait(driver,3).until(EC.presence_of_element_located((By.XPATH,f"//a[contains(., '더보기') and .//span[contains(., '블로그리뷰')]]")))
           element.click()
         except:
           print('블로그 리뷰 더보기 버튼이 없습니다.')
 
         try:
-          element = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul')))
+          element = WebDriverWait(driver,3).until(EC.presence_of_element_located((By.XPATH,f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul')))
           list_items = element.find_elements(By.TAG_NAME, "li")
         
           for item in list_items:
@@ -165,6 +171,10 @@ def search_naver(query):
               driver.switch_to.frame('entryIframe')
             except:
               print('entryIframe이 없습니다.')
+              
+            element_span = item.find_element(By.XPATH, f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul/li[9]/a/div[3]/div[3]/span[2]')
+
+            if (element_span.text != '블로그'): continue
             item.click()
           
             driver.switch_to.window(driver.window_handles[1])
@@ -185,10 +195,13 @@ def search_naver(query):
           
         time.sleep(3)
         driver.switch_to.parent_frame()
-        driver.switch_to.frame("searchIframe")
+        try:
+          driver.switch_to.frame("searchIframe")
+        except:
+          print('searchIframe이 없습니다.')
         
         if (len(shop_reviews) != 0):
-          answer_api_chat_gpt('',shop_information)
+          # answer_api_chat_gpt('',shop_information)
           # answer_api_chat_gpt('','\n'.join(shop_reviews))
           continue
       
@@ -200,7 +213,7 @@ def search_naver(query):
         page_number_element.click()
         time.sleep(3)
       except:
-        print('더보기 버튼이 없습니다.')
+        print('다음 페이지가 없습니다.')
         break
 
     driver.close()
