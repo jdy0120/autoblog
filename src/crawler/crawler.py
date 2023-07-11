@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
 from src.chatgpt import answer_api_chat_gpt
+from src.blog_poster import CreatePost
 import time
 
 def infinity_scroll(driver):
@@ -201,8 +202,10 @@ def search_naver(query):
           print('searchIframe이 없습니다.')
         
         if (len(shop_reviews) != 0):
-          # answer_api_chat_gpt('',shop_information)
+          answer_api_chat_gpt('',shop_information)
           # answer_api_chat_gpt('','\n'.join(shop_reviews))
+          
+          CreatePost('테스트1', shop_information)
           continue
       
       page_list_count += 1
