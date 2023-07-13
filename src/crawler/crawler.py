@@ -141,6 +141,10 @@ def search_naver(query):
         canSearch = search_list(shop)
         if (canSearch == False):
           continue
+        
+        shop_name = shop.find_element(By.XPATH,f"./div[1]/a[1]/div/div/span[1]")
+
+        shop_name_text = shop_name.text
 
         time.sleep(3)
         
@@ -202,10 +206,21 @@ def search_naver(query):
           print('searchIframe이 없습니다.')
         
         if (len(shop_reviews) != 0):
-          answer_api_chat_gpt('',shop_information)
-          # answer_api_chat_gpt('','\n'.join(shop_reviews))
+          shop_information = answer_api_chat_gpt(shop_name_text,shop_information)
+          shop_review_chatgpt = []
+          for x in shop_reviews:
+            chat_gpt_review = answer_api_chat_gpt(shop_name_text,x,0)
+            shop_review_chatgpt.append(chat_gpt_review)
           
-          CreatePost('테스트1', shop_information)
+          write_review = answer_api_chat_gpt(shop_name_text,'\n'.join(shop_review_chatgpt))
+          
+          if (write_review == ''):
+            write_review = '리뷰가 없습니다.'
+            continue
+          
+          title = shop_name_text + ' 리뷰'
+          
+          CreatePost(title, shop_information + '\n\n\n\n' + write_review)
           continue
       
       page_list_count += 1
