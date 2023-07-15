@@ -209,7 +209,7 @@ def search_naver(query):
           shop_information = answer_api_chat_gpt(shop_name_text,shop_information)
           shop_review_chatgpt = []
           for x in shop_reviews:
-            chat_gpt_review = answer_api_chat_gpt(shop_name_text,x,0)
+            chat_gpt_review = answer_api_chat_gpt(shop_name_text,x)
             shop_review_chatgpt.append(chat_gpt_review)
           
           write_review = answer_api_chat_gpt(shop_name_text,'\n'.join(shop_review_chatgpt))
@@ -218,7 +218,7 @@ def search_naver(query):
             write_review = '리뷰가 없습니다.'
             continue
           
-          title = shop_name_text + ' 리뷰'
+          title = query + ' ' + shop_name_text + ' 리뷰'
           
           CreatePost(title, shop_information + '\n\n\n\n' + write_review)
           continue
