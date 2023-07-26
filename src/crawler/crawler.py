@@ -112,7 +112,7 @@ def search_naver(query):
     driver = webdriver.Chrome()
 
     # naver.com에 접근
-    driver.get("https://map.naver.com/v5/search/" + query + '맛집')
+    driver.get("https://map.naver.com/v5/search/" + query + ' 맛집')
     
     
     
@@ -176,15 +176,16 @@ def search_naver(query):
               driver.switch_to.frame('entryIframe')
             except:
               print('entryIframe이 없습니다.')
-              
-            element_span = item.find_element(By.XPATH, f'//*[@id="app-root"]/div/div/div/div[7]/div[3]/div/div[1]/ul/li[9]/a/div[3]/div[3]/span[2]')
-
+            
+            element_span = item.find_element(By.XPATH, './a/div[3]/div[3]/span[2]')
+            
             if (element_span.text != '블로그'): continue
             item.click()
           
             driver.switch_to.window(driver.window_handles[1])
             
-            driver.switch_to.frame('mainFrame')
+            main = driver.switch_to.frame('mainFrame')
+            print(main)
             
             blog_post = driver.find_elements(By.CSS_SELECTOR,f"div[id*='post-view']")
             
@@ -206,16 +207,17 @@ def search_naver(query):
           print('searchIframe이 없습니다.')
         
         if (len(shop_reviews) != 0):
-          shop_information = answer_api_chat_gpt(shop_name_text,shop_information)
+          shop_information = answer_api_chat_gpt(shop_name_text,shop_information,type='information')
           shop_review_chatgpt = []
           for x in shop_reviews:
-            chat_gpt_review = answer_api_chat_gpt(shop_name_text,x)
+            chat_gpt_review = answer_api_chat_gpt(shop_name_text,x,length=350,type='normal')
             shop_review_chatgpt.append(chat_gpt_review)
           
-          write_review = answer_api_chat_gpt(shop_name_text,'\n'.join(shop_review_chatgpt))
+          write_review = answer_api_chat_gpt(shop_name_text,'\n'.join(shop_review_chatgpt),type='final')
+          print('gpt-api')
           
           if (write_review == ''):
-            write_review = '리뷰가 없습니다.'
+            print('리뷰가 없습니다.')
             continue
           
           title = query + ' ' + shop_name_text + ' 리뷰'
