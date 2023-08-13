@@ -56,6 +56,8 @@ def search_detail(driver):
   element = driver.find_element(By.CLASS_NAME,f'PIbes')
   all_infos = element.find_elements(By.XPATH, './div')
   
+  shop_address = ''
+  
   for e in all_infos:
     try:
       # aria-expanded="false" 속성을 가진 a 태그를 찾습니다.
@@ -78,6 +80,9 @@ def search_detail(driver):
       info_value = e.find_element(By.XPATH,'./div')
       print(info_value.text)
       
+      if (info_key.text == '주소'):
+        shop_address = info_value.text
+      
       if (info_key.text != '정보 수정 제안'):
         shop_info[info_key.text] = info_value.text
 
@@ -97,11 +102,10 @@ def search_detail(driver):
   for key, value in shop_info.items():
     shop_information += f'{key} : {value} \n'
     
-  return shop_information
+  return shop_information,shop_address
   
   
 def search_naver(query):
-    # 크롬 웹드라이버의 경로를 입력하세요
     
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -153,7 +157,7 @@ def search_naver(query):
         
         driver.switch_to.frame('entryIframe')
         
-        shop_information = search_detail(driver)
+        shop_information,shop_address = search_detail(driver)
         
         shop_reviews = []
         
@@ -214,22 +218,22 @@ def search_naver(query):
             shop_review_chatgpt.append(chat_gpt_review)
           
           write_review = answer_api_chat_gpt(shop_name_text,'\n'.join(shop_review_chatgpt),type='final')
-          print('gpt-api')
+          print('-------------------------------------gpt-api-------------------------------------')
           
           if (write_review == ''):
             print('리뷰가 없습니다.')
             continue
           
-          title = query + ' ' + shop_name_text + ' 리뷰'
+          # title = query + ' ' + shop_name_text + ' 리뷰'
           
-          CreatePost(title, shop_information + '\n\n\n\n' + write_review)
+          # CreatePost(shop_address, title, shop_information + '\n\n\n\n' + write_review)
           continue
       
       page_list_count += 1
       
       try:
-        element = driver.find_element(By.CLASS_NAME,f'zRM9F')
-        page_number_element = element.find_element(By.XPATH, f"//a[text()={page_list_count}]")
+        pageElement = driver.find_element(By.CLASS_NAME,f'zRM9F')
+        page_number_element = pageElement.find_element(By.XPATH, f"//a[text()={page_list_count}]")
         page_number_element.click()
         time.sleep(3)
       except:
